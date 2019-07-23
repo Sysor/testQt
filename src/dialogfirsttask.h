@@ -17,12 +17,17 @@ public:
     ~DialogFirstTask();
 
     void addPoint(double x, double y);
+    double getMaxValue();
 private slots:
     void on_toolButton_3_clicked();
 
     void on_toolButton_2_clicked();
 
     void on_toolButton_clicked();
+
+    void on_sldInterval_valueChanged(int value);
+
+    void on_edInterval_returnPressed();
 
 private:
     Ui::DialogFirstTask *ui;

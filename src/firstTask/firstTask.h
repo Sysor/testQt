@@ -1,20 +1,21 @@
-#include <QThread>
 #include "ireceiver.h"
+#include <QObject>
 
-class firstTask : public QThread{
+class firstTask : public QObject{
+    Q_OBJECT
 public:
     firstTask(IReceiver *receiver);
     ~firstTask();
 
-    void start();
+    void start(int nInterval);
     void stop();
     void pause();
+
+    bool isRunning();
 private:
     IReceiver *m_Receiver;
-
-    void run();
-public:
-    signals:
-    void onPause();
-    void onResume();
+public slots:
+    void onIntervalChange(int nNewInterval);
+private slots:
+    void onTimerTick();
 };

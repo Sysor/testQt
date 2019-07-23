@@ -33,7 +33,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QVBoxLayout" name="vl" stretch="1,0">
+    <layout class="QVBoxLayout" name="vl" stretch="1,0,0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
@@ -42,6 +42,39 @@
      </property>
      <item>
       <widget class="QCustomPlot" name="plot" native="true"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>interval</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="edInterval">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="sldInterval">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>5</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
@@ -53,8 +86,27 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
          <property name="text">
-          <string>Start</string>
+          <string>Play</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../res/PLAY.svg</normaloff>../res/PLAY.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>64</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
+         </property>
+         <property name="autoRaise">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -69,6 +121,13 @@
          <property name="text">
           <string>Stop</string>
          </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../res/STOP.svg</normaloff>../res/STOP.svg</iconset>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
+         </property>
         </widget>
        </item>
        <item>
@@ -82,8 +141,15 @@
          <property name="text">
           <string>Pause</string>
          </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../res/PAUSE.svg</normaloff>../res/PAUSE.svg</iconset>
+         </property>
          <property name="checkable">
           <bool>false</bool>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
          </property>
          <property name="autoRaise">
           <bool>false</bool>

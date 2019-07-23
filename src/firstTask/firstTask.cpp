@@ -3,51 +3,56 @@
 #include <cstdlib>
 #include <ctime>
 
-static bool bStop = false;
-static bool bPause = false;
+#include <QTimer>
+#include <QThread>
+
+static QTimer _timer;
+static std::default_random_engine re;
+static double maxRange = 5.0;
+static bool bIsPaused = false;
 
 firstTask::firstTask(IReceiver *receiver) : m_Receiver(receiver) {
+    maxRange = receiver->getMaxValue();
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(onTimerTick()));
 }
 
 firstTask::~firstTask()
 {
-    bStop = true;
+    stop();
 }
 
 double getNumber(double upper_bound){
     double lower_bound = 0;
     std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
-    std::default_random_engine re;
     return unif(re);
 }
 
-void firstTask::run(){
-    while(!bStop){
-        if(!bPause){
-            m_Receiver->addPoint(getNumber(5), getNumber(5));
-        }
-        msleep(100L);
+void firstTask::start(int nInterval){
+    if(!_timer.isActive()){
+        _timer.setInterval(nInterval);
+        _timer.start();
     }
-}
-
-void firstTask::start(){    
-    this->run();
+    else if(bIsPaused) {
+        bIsPaused = false;
+        _timer.blockSignals(false);
+    }
 }
 
 void firstTask::stop(){
-    exit();
+    _timer.stop();
 }
 
 void firstTask::pause(){
-    bPause = isRunning();
-    if(isRunning()){
-        emit onPause();
-    }
-    else{
-        emit onResume();
-    }
+    _timer.blockSignals(true);
+    bIsPaused = true;
 }
 
-void firstTask::onPause(){}
+void firstTask::onTimerTick(){    
+    m_Receiver->addPoint(getNumber(maxRange), getNumber(maxRange));
+}
 
-void firstTask::onResume(){}
+void firstTask::onIntervalChange(int nNewInterval){
+    _timer.stop();
+    _timer.setInterval(nNewInterval);
+    _timer.start();
+}

@@ -17,7 +17,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_bntFirst_clicked()
 {
-    QDialog *dlg = new DialogFirstTask(this);
+    QDialog *dlg = new DialogFirstTask(this);    
     dlg->setModal(true);
     dlg->show();
 }
