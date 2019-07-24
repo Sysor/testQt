@@ -18,6 +18,8 @@ public:
 
     void addPoint(double x, double y);
     double getMaxValue();
+signals:
+    void intervalChanged(int nNewInterval);
 private slots:
     void on_toolButton_3_clicked();
 

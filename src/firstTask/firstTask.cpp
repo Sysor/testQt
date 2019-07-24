@@ -9,7 +9,6 @@
 static QTimer _timer;
 static std::default_random_engine re;
 static double maxRange = 5.0;
-static bool bIsPaused = false;
 
 firstTask::firstTask(IReceiver *receiver) : m_Receiver(receiver) {
     maxRange = receiver->getMaxValue();
@@ -30,11 +29,8 @@ double getNumber(double upper_bound){
 void firstTask::start(int nInterval){
     if(!_timer.isActive()){
         _timer.setInterval(nInterval);
-        _timer.start();
-    }
-    else if(bIsPaused) {
-        bIsPaused = false;
         _timer.blockSignals(false);
+        _timer.start();
     }
 }
 
@@ -44,7 +40,10 @@ void firstTask::stop(){
 
 void firstTask::pause(){
     _timer.blockSignals(true);
-    bIsPaused = true;
+}
+
+bool firstTask::isRunning(){
+    return _timer.isActive();
 }
 
 void firstTask::onTimerTick(){    

@@ -13,7 +13,6 @@ static firstTask *task = nullptr;
 static QCustomPlot *plot = nullptr;
 
 static double upperValue = 10.0;
-static int nInterval = 1;
 
 QCPGraph *initGraph(QCustomPlot *plot){
     QCPGraph *graph = plot->addGraph();
@@ -29,6 +28,13 @@ QCPGraph *initGraph(QCustomPlot *plot){
     return graph;
 }
 
+void reRunTask(int nInterval){
+    if(task->isRunning()){
+        task->stop();
+    }
+    task->start(nInterval *1000);
+}
+
 DialogFirstTask::DialogFirstTask(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogFirstTask)
@@ -39,6 +45,7 @@ DialogFirstTask::DialogFirstTask(QWidget *parent) :
     plot = ui->plot;
     graph = initGraph(plot);
     task = new firstTask(this);
+    //connect(this, SIGNAL(intervalChanged()), &task, SLOT(onIntervalChanged()));
 }
 
 DialogFirstTask::~DialogFirstTask()
@@ -49,6 +56,10 @@ DialogFirstTask::~DialogFirstTask()
     }
     plot->clearGraphs();
     delete ui;
+}
+
+void DialogFirstTask::intervalChanged(int nNewInterval){
+
 }
 
 double DialogFirstTask::getMaxValue(){
@@ -65,7 +76,7 @@ void DialogFirstTask::addPoint(double x, double y){
 
 void DialogFirstTask::on_toolButton_3_clicked()
 {
-    task->start(nInterval*1000);
+    reRunTask(1);
 }
 
 void DialogFirstTask::on_toolButton_2_clicked()
@@ -84,11 +95,23 @@ void DialogFirstTask::on_toolButton_clicked()
 
 void DialogFirstTask::on_sldInterval_valueChanged(int value)
 {
-    ui->edInterval->setText(QString(std::to_string(value).c_str()));
+    int nValue = value;
+    ui->edInterval->setText(QString(std::to_string(nValue).c_str()));
+    reRunTask(nValue);
 }
 
 void DialogFirstTask::on_edInterval_returnPressed()
 {
-     nInterval = ui->edInterval->text().toInt();
-     ui->sldInterval->setValue(nInterval);
+     int nValue = ui->edInterval->text().toInt();
+     if(nValue < ui->sldInterval->minimum()){
+         nValue = ui->sldInterval->minimum();
+         ui->edInterval->setText(QString(std::to_string(nValue).c_str()));
+     }
+     else if(nValue > ui->sldInterval->maximum()){
+         nValue = ui->sldInterval->maximum();
+         ui->edInterval->setText(QString(std::to_string(nValue).c_str()));
+     }
+
+     ui->sldInterval->setValue(nValue);
+     reRunTask(nValue);
 }

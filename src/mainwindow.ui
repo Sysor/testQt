@@ -17,13 +17,16 @@
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>60</y>
-      <width>82</width>
-      <height>77</height>
+      <x>90</x>
+      <y>10</y>
+      <width>201</width>
+      <height>191</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinAndMaxSize</enum>
+     </property>
      <item>
       <widget class="QPushButton" name="bntFirst">
        <property name="text">
