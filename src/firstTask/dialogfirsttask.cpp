@@ -58,9 +58,6 @@ DialogFirstTask::~DialogFirstTask()
     delete ui;
 }
 
-void DialogFirstTask::intervalChanged(int nNewInterval){
-
-}
 
 double DialogFirstTask::getMaxValue(){
     return upperValue;

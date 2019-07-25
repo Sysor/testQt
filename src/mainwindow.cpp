@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QToolButton>
 #include <QDockWidget>
-#include "dialogfirsttask.h"
+#include "firstTask/dialogfirsttask.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
