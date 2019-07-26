@@ -18,8 +18,14 @@ public:
 private slots:
     void on_bntFirst_clicked();
 
+    void on_btnSecond_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H
