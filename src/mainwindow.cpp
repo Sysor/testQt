@@ -7,7 +7,8 @@
 #include "secondTask/controller/controller.h"
 #include "ui_mainwindow.h"
 
-static Controller *ctrl = nullptr;
+//static Controller *ctrl = nullptr;
+static Model *model = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -30,7 +31,9 @@ void MainWindow::on_bntFirst_clicked()
 void MainWindow::on_btnSecond_clicked()
 {
     auto *dlg = new secondTaskDialog(this);
-    ctrl = Controller::getInstance(static_cast<IView*>(dlg));
+    model = new Model(5, 5);
+    //ctrl = Controller::getInstance(static_cast<IView*>(dlg));
+    dlg->setModel(model);
     dlg->setModal(true);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
@@ -39,7 +42,10 @@ void MainWindow::on_btnSecond_clicked()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     event->accept();
-    if(ctrl != nullptr){
-        delete ctrl;
+    if(model != nullptr){
+        delete model;
     }
+//    if(ctrl != nullptr){
+//        delete ctrl;
+//    }
 }

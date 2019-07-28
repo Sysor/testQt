@@ -3,12 +3,13 @@
 
 #include "iview.h"
 #include <QDialog>
+#include <qabstractbutton.h>
 
 namespace Ui {
     class secondTaskDialog;
     }
 
-class secondTaskDialog : public QDialog, public IView
+class secondTaskDialog : public QDialog//, public IView
 {
     Q_OBJECT
 
@@ -19,19 +20,16 @@ public:
 // IView interface
     void setModel(QAbstractTableModel *model);
 
-signals:
-    void newRow();
-    void deleteRow();
-    void copyRow();
-
-
 private slots:
-    void contextMenuTriggered(QPoint);
-    void on_actionadd_triggered();
-    void slotEditRecord();
-    void slotRemoveRecord();
-
     void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+
+    void on_buttonBox_clicked(QAbstractButton *button);
+
+    void on_actionadd_triggered();
+
+    void on_actioncopy_triggered();
+
+    void on_actiondelete_triggered();
 
 private:
     Ui::secondTaskDialog *ui;  

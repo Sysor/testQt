@@ -12,14 +12,14 @@ typedef QList<row*> items;
 static items *_data = nullptr;
 static row *columns_header = nullptr;
 static row *rows_header = nullptr;
+static Model *pThis = nullptr;
 
 bool vaidateIndex(const QModelIndex &index){
     bool bResult = false;
     if(!_data->isEmpty() && index.isValid()){
         row *r = _data->at(0);
-        field *f = r->at(0);
         if((index.row() >=0 && index.row() < _data->size()) &&
-                index.column() >= 0 && index.column() < f->size()){
+                index.column() >= 0 && index.column() < r->size()){
             bResult = true;
         }
     }
@@ -31,14 +31,13 @@ int genIntValue(int nMax){
 }
 
 Model::Model(int nRows, int nColumns){
+    pThis = this;
     _data = new items();
     columns_header = new row();
     rows_header = new row();
 
     insertRows(0, nRows);
-    insertColumns(0, nColumns);
-
-    field *f = new field();
+    insertColumns(0, nColumns-1);
 
     srand(static_cast<unsigned int>(time(nullptr)));
     for(int r=0; r<nRows; r++){
@@ -48,15 +47,26 @@ Model::Model(int nRows, int nColumns){
             int nColumnIndex = c + 1;
             setHeaderData(c, Qt::Vertical, QVariant(nColumnIndex), Qt::DisplayRole);
             QModelIndex index = createIndex(r, c);
-            f->insert(Qt::EditRole, QVariant(genIntValue(10)));
-            setItemData(index, *f);
-            f->clear();
+            setData(index, QVariant(genIntValue(10)), Qt::DisplayRole);
         }
     }
-    delete f;
-    QModelIndex topLeft = createIndex(0, 0);
-    QModelIndex bottomRight = createIndex(nRows, nColumns);
-    emit dataChanged(topLeft, bottomRight);
+}
+
+void fillField(field *f, field *original_field){
+    for(field::iterator f_it=original_field->begin(); f_it!=original_field->end(); f_it++){
+//        pThis->setData(_index, f_it.value(), f_it.key());
+        f->insert(f_it.key(), f_it.value());
+    }
+}
+
+void fillRow(row *r, row *original_row){
+    int _column_index = 0;
+    for(row::iterator it = original_row->begin(); it!=original_row->end(); it++){
+        field *original_field = *it;
+        field *f = r->at(_column_index++);
+        //QModelIndex _index = pThis->index(nRow, _column_index++);
+        fillField(f, original_field);
+    }
 }
 
 Model::~Model(){
@@ -72,13 +82,13 @@ Model::~Model(){
 
 int Model::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
     return _data->size();
 }
 
 int Model::columnCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
     int nResult = 0;
     if(!_data->isEmpty()){
         nResult = _data->first()->size();
@@ -99,38 +109,31 @@ QVariant Model::data(const QModelIndex &index, int role) const
     return result;
 }
 
-bool Model::setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles)
+bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     bool bResult = false;
     if(vaidateIndex(index)){
         field *f =_data->at(index.row())->at(index.column());
-        for(QMap<int, QVariant>::const_iterator it = roles.begin(); it!= roles.end(); it++){
-            f->insert(it.key(), it.value());
+        if(f != nullptr){
+            f->insert(role, value);
+            emit dataChanged(index, index);
+            bResult = true;
         }
-        bResult = true;
     }
 
     return bResult;
 }
 
-void fillField(field *new_field, field *original_field){
-    for(field::iterator f_it=original_field->begin(); f_it!=original_field->end(); f_it++){
-        new_field->insert(f_it.key(), f_it.value());
-    }
-}
-
-void fillRow(row *r, row *original_row){
-    for(row::iterator it = original_row->begin(); it!=original_row->end(); it++){
-        field *original_field = *it;
-        field *new_field = new field();
-        fillField(new_field, original_field);
-        r->push_back(new_field);
-    }
-}
-
 bool Model::insertRows(int _row, int _count, const QModelIndex &parent)
 {
     bool bResult = false;
+    row *original_row = nullptr;
+    if(vaidateIndex(parent)){
+        original_row = _data->at(parent.row());
+    }
+
+    //QList<row*> new_rows;
+    beginInsertRows(parent, _row, _row + _count-1);
     for(int i=0; i<_count; i++){
         row *r = new QList<field*>();
         if(_data->isEmpty()){
@@ -138,46 +141,54 @@ bool Model::insertRows(int _row, int _count, const QModelIndex &parent)
             field *f = new field();
             f->insert(Qt::DisplayRole, QVariant());
             r->push_back(f);
+
             bResult = true;
         }
         else{
             row *header = _data->at(0);
             //заполняем новый ряд пустыми полями
+            int j = 0;
             for(row::iterator it=header->begin(); it!=header->end(); it++){
                 field *f = new field();
+                if(vaidateIndex(parent)){
+                    field *original_field = original_row->at(j++);
+                    for(field::iterator it = original_field->begin(); it!= original_field->end(); it++){
+                        f->insert(it.key(), it.value());
+                    }
+                }
                 r->push_back(f);
             }
             bResult = true;
         }
 
         if(_row == 0){
-            //Копирование полей parent ряда в новые ряды
-            if(vaidateIndex(parent)){
-                bResult = true;
-                row *original_row = _data->at(parent.row());
-                fillRow(r, original_row);
-            }
             _data->push_front(r);
         }
         else if(_row == _data->size()){
-            //Копирование полей parent ряда в новые ряды
-            if(vaidateIndex(parent)){
-                bResult = true;
-                row *original_row = _data->at(parent.row());
-                fillRow(r, original_row);
-            }
             _data->push_back(r);
         }
         else{
             _data->insert(_row, r);
         }
+
+        //new_rows.push_back(r);
     }
+    endInsertRows();
+
+    //Копирование полей parent ряда в новые ряды
+//    if(vaidateIndex(parent)){
+//        QList<row*>::iterator it;
+//        for(it=new_rows.begin(); it!=new_rows.end(); it++){
+//            fillRow(*it, original_row);
+//        }
+//    }
     return bResult;
 }
 
 bool Model::insertColumns(int _column, int _count, const QModelIndex &parent)
 {
-    bool bResult = false;
+    bool bResult = false;    
+    beginInsertColumns(parent, _column, _column + _count-1);
     if(_data->isEmpty()){
         row *r = new row();
         for(int i=0; i<_count; i++){
@@ -191,17 +202,9 @@ bool Model::insertColumns(int _column, int _count, const QModelIndex &parent)
                 row *r = *it;
                 field *new_field = new field();
                 if(_column == 0){
-                    if(vaidateIndex(parent)){
-                        field *original_field = _data->at(parent.row())->at(parent.column());
-                        fillField(new_field, original_field);
-                    }
                     r->push_front(new_field);
                 }
                 else if(!_data->isEmpty() && _column == _data->at(0)->size()){
-                    if(vaidateIndex(parent)){
-                        field *original_field = _data->at(parent.row())->at(parent.column());
-                        fillField(new_field, original_field);
-                    }
                     r->push_back(new_field);
                 }
                 else{
@@ -210,64 +213,20 @@ bool Model::insertColumns(int _column, int _count, const QModelIndex &parent)
             }
         }
     }
+    endInsertColumns();
     return bResult;
 }
 
-QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    QVariant result;
-    row * r = nullptr;
-
-    switch (orientation) {
-    case Qt::Horizontal:
-        r = rows_header;
-        break;
-    case Qt::Vertical:
-        r = columns_header;
-        break;
-    }
-
-    if(!r->isEmpty()){
-        if(section >=0 && section < r->size()){
-            field *f = r->at(section);
-            field::iterator it = f->find(role);
-            if(it != f->end()){
-                result = it.value();
-            }
-        }
-    }
-
-    return result;
-}
-
-bool Model::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+bool Model::removeRows(int _row, int _count, const QModelIndex &parent)
 {
     bool bResult = false;
-
-    field *f = new field();
-    f->insert(role, value);
-    row *r = nullptr;
-    switch(orientation){
-    case Qt::Vertical:
-        r = rows_header;
-        break;
-    case Qt::Horizontal:
-        r = columns_header;
-        break;
-    }
-
-    if(r != nullptr){
-        if(section >=0){
-            if(section < r->size()){
-                r->replace(section, f);
-            }
-            else{
-                r->insert(section, f);
-            }
-            bResult = true;
-            emit headerDataChanged(orientation, section, section);
+    beginRemoveRows(parent, _row, _row + _count - 1);
+    if(_row >=0 && _row < _data->size()){
+        for(int i=0; i<_count; i++){
+            _data->removeAt(_row);
         }
     }
+    endRemoveRows();
     return bResult;
 }
 

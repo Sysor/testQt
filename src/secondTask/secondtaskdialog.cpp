@@ -11,6 +11,9 @@ secondTaskDialog::secondTaskDialog(QWidget *parent) :
 {
     ui->setupUi(this);    
     table = ui->table;
+    table->addAction(ui->actionadd);
+    table->addAction(ui->actioncopy);
+    table->addAction(ui->actiondelete);
 }
 
 secondTaskDialog::~secondTaskDialog()
@@ -21,38 +24,55 @@ secondTaskDialog::~secondTaskDialog()
 void secondTaskDialog::setModel(QAbstractTableModel *model)
 {
     table->setModel(model);
+    this->_model = model;
+
     connect(model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&)), this, SLOT(onDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&)));
     connect(model, SIGNAL(headerDataChanged(Qt::Orientation, int, int)), table, SLOT(update(const QModelIndex&)));
 }
 
-void secondTaskDialog::contextMenuTriggered(QPoint pos)
+void secondTaskDialog::onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
-    QMenu * menu = new QMenu(this);
-    menu->addAction(table->actions().at(0));
-    menu->addAction(table->actions().at(1));
-    connect(table->actions().at(0), SIGNAL(triggered()), this, SLOT(slotEditRecord()));     // Обработчик вызова диалога редактирования
-    connect(table->actions().at(1), SIGNAL(triggered()), this, SLOT(slotRemoveRecord())); // Обработчик удаления записи
-    /* Вызываем контекстное меню */
-    menu->popup(table->viewport()->mapToGlobal(pos));
+    Q_UNUSED(topLeft)
+    Q_UNUSED(bottomRight)
+    Q_UNUSED(roles)
+
+    table->update();
 }
 
+void secondTaskDialog::on_buttonBox_clicked(QAbstractButton *button)
+{
+    switch(ui->buttonBox->buttonRole(button)){
+    case QDialogButtonBox::AcceptRole:
+        break;
+    case QDialogButtonBox::RejectRole:
+        this->close();
+        break;
+    default:
+        break;
+    }
+}
 
 void secondTaskDialog::on_actionadd_triggered()
 {
-    table->edit(table->currentIndex());
+    this->_model->insertRow(_model->rowCount());
 }
 
-void secondTaskDialog::slotEditRecord()
+void secondTaskDialog::on_actioncopy_triggered()
 {
-
+    QItemSelectionModel *select = table->selectionModel();
+    if(select->hasSelection()){
+        QModelIndexList indexes = select->selectedIndexes();
+        QModelIndex &index = indexes.first();
+        this->_model->insertRow(_model->rowCount(), index);
+    }
 }
 
-void secondTaskDialog::slotRemoveRecord()
+void secondTaskDialog::on_actiondelete_triggered()
 {
-
-}
-
-void secondTaskDialog::onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
-{
-    table->update();
+    QItemSelectionModel *select = table->selectionModel();
+    if(select->hasSelection()){
+        QModelIndexList indexes = select->selectedIndexes();
+        QModelIndex &index = indexes.first();
+        this->_model->removeRow(index.row());
+    }
 }

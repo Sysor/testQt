@@ -18,7 +18,7 @@ Controller::~Controller(){
 
 void Controller::addNewRow()
 {
-
+    _model->insertRow(_model->rowCount());
 }
 
 
