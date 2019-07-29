@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include <QToolButton>
 #include <QDockWidget>
+#include <QMessageBox>
+
 #include <qevent.h>
 #include "firstTask/dialogfirsttask.h"
 #include "secondTask/secondtaskdialog.h"
@@ -9,6 +11,7 @@
 
 //static Controller *ctrl = nullptr;
 static Model *model = nullptr;
+static QMessageBox *msg = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -31,7 +34,8 @@ void MainWindow::on_bntFirst_clicked()
 void MainWindow::on_btnSecond_clicked()
 {
     auto *dlg = new secondTaskDialog(this);
-    model = new Model(5, 5);
+    QList<QString> columns = {"X", "Y", "Z"};
+    model = new Model(5, columns);
     //ctrl = Controller::getInstance(static_cast<IView*>(dlg));
     dlg->setModel(model);
     dlg->setModal(true);
@@ -45,7 +49,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if(model != nullptr){
         delete model;
     }
+    if(msg != nullptr){
+        delete msg;
+    }
 //    if(ctrl != nullptr){
 //        delete ctrl;
 //    }
+}
+
+void MainWindow::on_btnThird_clicked()
+{
+    msg = new QMessageBox(QMessageBox::NoIcon, tr(""), tr("sorry, not implemented"), QMessageBox::Ok, this);
+    msg->setModal(true);
+    msg->show();
 }

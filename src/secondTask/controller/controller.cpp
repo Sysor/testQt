@@ -1,9 +1,11 @@
 #include "controller.h"
+#include <QList>
 
 static Controller *ctrl = nullptr;
 
 Controller::Controller(IView *view){
-    this->_model = new Model(5, 5);
+    QList<QString> columns = {"X", "Y", "Z"};
+    this->_model = new Model(5, columns);
     this->_view = view;
 
     _view->setModel(_model);

@@ -23,11 +23,11 @@ secondTaskDialog::~secondTaskDialog()
 
 void secondTaskDialog::setModel(QAbstractTableModel *model)
 {
-    table->setModel(model);
     this->_model = model;
+    table->setModel(model);
 
     connect(model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&)), this, SLOT(onDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&)));
-    connect(model, SIGNAL(headerDataChanged(Qt::Orientation, int, int)), table, SLOT(update(const QModelIndex&)));
+    //connect(model, SIGNAL(headerDataChanged(Qt::Orientation, int, int)), table, SLOT(update(const QModelIndex&)));
 }
 
 void secondTaskDialog::onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
